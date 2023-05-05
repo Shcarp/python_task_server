@@ -1,0 +1,28 @@
+{
+  "name": "AaVC-service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon src/app.ts",
+    "service": "ts-node src/app.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "fast-json-stringify": "^5.7.0",
+    "fastify": "^4.16.3",
+    "koa": "^2.14.2",
+    "mysql2": "^3.2.4",
+    "nodemailer": "^6.9.1",
+    "pino": "^8.11.0",
+    "redis": "^4.6.6"
+  },
+  "devDependencies": {
+    "@types/node": "^18.16.1",
+    "@types/nodemailer": "^6.4.7"
+  }
+}

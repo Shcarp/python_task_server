@@ -1,0 +1,123 @@
+import { pino } from "pino";
+
+import { MySql } from "./init";
+import { usersql } from "./init.sql";
+import { OkPacket } from "mysql2";
+import { UserInfo } from "../../type";
+
+const log = pino();
+
+type CreatorUser = Omit<UserInfo, "id" | "last_active" | "created_at" | "updated_at" | "profile_picture">;
+
+export class UserSql extends MySql {
+    private userInfofield = `id, username, email, profile_picture, last_active, created_at, updated_at`
+
+    // 判断用户名是否存在
+    public async checkUsernameExist(username: string) {
+        const sql = `SELECT username FROM av_user WHERE username = '${username}'`;
+        try {
+            const result = await this.query<UserInfo[]>(sql);
+            if(result.length > 0) {
+                return true;
+            }
+        } catch (error) {
+            log.error(`Failed to check the username exist. Error info: ${error}`);
+            return false;
+        }
+    }
+
+    // 插入一个用户
+    public async insertUser(user: CreatorUser) {
+        const sql = `INSERT INTO av_user (username, password, email, created_at, updated_at) 
+        VALUES ('${user.username}', '${user.password}', '${user.email}', NOW(), NOW());
+        `;
+        try {
+            await this.query<OkPacket>(sql);
+            log.info(`Successfully insert a user: ${user.username}`)
+        } catch (error) {
+            log.error(`Failed to insert a user. Error info: ${error}`);
+        }
+    }
+
+    // 判断用户登录密码是否正确
+    public async checkUserPassword(username: string, password: string) {
+        const sql = `SELECT * FROM av_user WHERE username = '${username}' AND password = '${password}'`;
+        try {
+            const result = await this.query<UserInfo[]>(sql);
+            if (result.length !== 1) {
+                return null;
+            }
+            // 更新用户最后登录时间
+            await this.updateUserLastActive(result[0].id);
+            log.info(`Successfully login: ${username}`)
+            return result[0];
+        } catch (error) {
+            log.error(`Failed to check the user password. Error info: ${error}`);
+        }
+    }
+
+    // 更新用户最后登录时间
+    public async updateUserLastActive(id: number) {
+        const sql = `UPDATE av_user SET last_active = NOW() WHERE id = '${id}'`;
+        try {
+            await this.query(sql);
+        } catch (error) {
+            log.error(`Failed to update the user last active time. Error info: ${error}`);
+        }
+    }
+
+    // 更新用户信息
+    public async updateUserInfo(id: number, user: CreatorUser) {
+        const sql = `UPDATE av_user SET username = '${user.username}', password = '${user.password}', email = '${user.email}', updated_at = NOW() WHERE id = '${id}'`;
+        try {
+            await this.query(sql);
+            log.info(`Successfully update the user info: ${user.username}`)
+        } catch (error) {
+            log.error(`Failed to update the user info. Error info: ${error}`);
+        }
+    }
+
+    // 获取用户信息
+    public async getUserInfo(username: string) {
+        const sql = `SELECT ${this.userInfofield} FROM av_user WHERE username = '${username}'`;
+        try {
+            const result = await this.query<UserInfo[]>(sql);
+            return result[0];
+        } catch (error) {
+            log.error(`Failed to get the user info. Error info: ${error}`);
+        }
+    }
+    // checkEmailCorrect
+    public async checkEmailCorrect(username: string, email: string) {
+
+        const sql = `SELECT ${this.userInfofield} FROM av_user WHERE username = '${username}' AND email = '${email}' `;
+        try {
+            const result = await this.query<UserInfo[]>(sql);
+            if(result.length > 0) {
+                return true;
+            }   
+        } catch (error) {
+            log.error(`Failed to check the email correct. Error info: ${error}`);
+            return false;
+        }
+    }
+
+    // 更新用户密码
+    public async updateUserPassword(id: number, password: string) {
+        const sql = `UPDATE av_user SET password = '${password}', updated_at = NOW() WHERE id = '${id}'`;
+        try {
+            await this.query(sql);
+            log.info(`Successfully update the user password: ${id}`)
+        } catch (error) {
+            log.error(`Failed to update the user password. Error info: ${error}`);
+        }
+    }
+
+    protected async init() {
+        try {
+            await this.query(usersql);
+        } catch (error) {
+            log.error(`Failed to create the av_user table. Error info: ${error}`);
+        }
+    }
+}
