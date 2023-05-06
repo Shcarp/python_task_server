@@ -103,15 +103,27 @@ export class UserSql extends MySql {
     }
 
     // 更新用户密码
-    public async updateUserPassword(id: number, password: string) {
-        const sql = `UPDATE av_user SET password = '${password}', updated_at = NOW() WHERE id = '${id}'`;
+    public async updateUserPassword(email: string, password: string) {
+        const sql = `UPDATE av_user SET password = '${password}', updated_at = NOW() WHERE username = '${email}'`;
         try {
             await this.query(sql);
-            log.info(`Successfully update the user password: ${id}`)
+            log.info(`Successfully update the user password: ${email}`)
         } catch (error) {
             log.error(`Failed to update the user password. Error info: ${error}`);
         }
     }
+
+    // 更新用户头像
+    public async updateUserProfilePicture(id: number, profile_picture: string) {
+        const sql = `UPDATE av_user SET profile_picture = '${profile_picture}', updated_at = NOW() WHERE id = '${id}'`;
+        try {
+            await this.query(sql);
+            log.info(`Successfully update the user profile picture: ${id}`)
+        } catch (error) {
+            log.error(`Failed to update the user profile picture. Error info: ${error}`);
+        }
+    }
+    
 
     protected async init() {
         try {

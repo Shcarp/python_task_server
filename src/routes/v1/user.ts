@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyPluginOptions } from "fastify";
-import { handleCheckoutUsername, handleLogin, handleRegister, handleForgetPassword } from "../../handle/v1/user";
+import { handleCheckoutUsername, handleLogin, handleRegister, handleGetVerifyCode, handleCheckVerifyCode, handleLogout, handleResetPassword } from "../../handle/v1/user";
 
 export default function (fastify: FastifyInstance, opts: FastifyPluginOptions, next: () => void) {
     // 注册用户
@@ -44,9 +44,7 @@ export default function (fastify: FastifyInstance, opts: FastifyPluginOptions, n
                         properties: {
                             code: { type: "number" },
                             msg: { type: "string" },
-                            data: {
-                                $ref: "v1/userInfo",
-                            },
+                            data: { type: "string"}
                         },
                     },
                 },
@@ -54,6 +52,9 @@ export default function (fastify: FastifyInstance, opts: FastifyPluginOptions, n
         },
         handleLogin
     );
+    // 退出登录
+    fastify.get("/logout", handleLogout);
+
     // 判断用户名是否存在
     fastify.get(
         "/checkUsernameExist",
@@ -80,43 +81,30 @@ export default function (fastify: FastifyInstance, opts: FastifyPluginOptions, n
         },
         handleCheckoutUsername
     );
-    // 忘记密码
-    fastify.post("/forgetPassword", handleForgetPassword);
+
+    // 重置密码
+    fastify.post("/resetPassword", {
+        schema: {
+            body: {
+                type: "object",
+                properties: {
+                    password: { type: "string" },
+                    email: { type: "string" },
+                },
+            },
+            response: {
+                200: {
+                    $ref: "opt/200",
+                },
+            },
+        }
+    }, handleResetPassword)
 
     // 获取邮箱验证码
-    fastify.get("/getVerifyCode", async (request, reply) => {
-        const generateVerifyCode = async () => {
-            // 生成6位数随机数
-            const verifyCode = Math.floor(Math.random() * 1000000)
-                .toString()
-                .padStart(6, "0");
-            await request.verifyCodeRedis.setVerifyCode(email, verifyCode);
-            return verifyCode;
-        };
-        let retry = 1;
-        const send = async () => {
-            try {
-                await reply.sendMail(email, "VerifyCode", "VerifyCode",  await generateVerifyCode());
-            } catch (error) {
-                console.log(retry)
-                if(retry < 3) {
-                    retry++;
-                    send()
-                }else {
-                    console.log(error)
-                    // log.error(error);
-                }
-            }
-        };
+    fastify.get("/getVerifyCode", handleGetVerifyCode);
 
-        const { email } = request.query as { email: string };
-        // // 生成6位数随机数
-        send()
+    // 验证验证码
+    fastify.post("/checkVerifyCode", handleCheckVerifyCode);
 
-        reply.send({
-            code: 0,
-            msg: "Successfully get the verify code.",
-        });
-    });
     next();
 }
