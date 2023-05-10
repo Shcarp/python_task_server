@@ -14,3 +14,26 @@ export const stringifyUserInfo = fastJson({
         updated_at: { type: "string" },
     },
 });
+
+export const stringifyRoomInfo = fastJson({
+    title: "roomInfo",
+    type: "object",
+    properties: {
+        owner_id: { type: "number" },
+        room_id: { type: "string" },
+        room_name: { type: "string" },
+        created_at: { type: "string" },
+        updated_at: { type: "string" },
+        description: { type: "string" },
+    },
+});
+
+export const stringifyRoomInfoList = fastJson({
+    title: "roomInfoList",
+    type: "array",
+    items: {
+        type: "string",
+    },
+});
+
+

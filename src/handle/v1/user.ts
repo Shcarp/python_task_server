@@ -46,7 +46,12 @@ export const handleLogin = async (request: FastifyRequest, reply: FastifyReply) 
         });
         return;
     }
-    const token = await reply.jwtSign(userInfo);
+    let token = await request.server.userRedis.getUserToken(userInfo.username)
+    if (!token) {
+        token = await reply.jwtSign(userInfo);
+        await request.server.userRedis.setUserToken(userInfo.username, token);
+    }
+
     // 保存用户登录信息
     await request.server.userRedis.setUserLoginInfo(token, userInfo);
 
@@ -59,27 +64,13 @@ export const handleLogin = async (request: FastifyRequest, reply: FastifyReply) 
 
 // 退出登录
 export const handleLogout = async (request: FastifyRequest, reply: FastifyReply) => {
-    const noLogin = () => {
-        reply.send({
-            code: 1,
-            msg: "The user is not login.",
-        });
-    };
 
     // 从请求头中获取token
     const token = request.headers.authorization;
-    
-    if (!token) {
-        noLogin();
-        return;
-    }
-    // 判断用户是否已登录
-    const isLogin = await request.server.userRedis.checkUserLogin(token);
-    if (!isLogin) {
-        noLogin();
-        return;
-    }
     // 删除用户登录信息
+    if (!token) {
+        return;
+    }
     await request.server.userRedis.delUserLoginInfo(token);
     reply.send({
         code: 0,
