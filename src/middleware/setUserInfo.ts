@@ -11,7 +11,7 @@ const setUserInfo = fp((fastify: FastifyInstance, opts: FastifyPluginOptions, ne
         if (!token) {
             return;
         }
-        const userInfo = await request.server.userRedis.getUserLoginInfo(token);
+        const userInfo = await request.server.userCache.getUserLoginInfo(token);
         if (!userInfo) {
             return;
         }

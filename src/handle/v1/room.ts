@@ -6,9 +6,9 @@ export const handleCreateRoom: RouteHandlerMethod = async (request: FastifyReque
     const { roomName, description } = request.body as { roomName: string, description: string };
     const { username, id } = request.userInfo;
     // 创建房间
-    const roomId = await request.server.roomRedis.createChatRoom(id ,roomName, description);
+    const roomId = await request.server.roomCache.createChatRoom(id ,roomName, description);
     // 将用户加入房间
-    await request.server.roomRedis.joinChatRoom(roomId, username);
+    await request.server.roomCache.joinChatRoom(roomId, username);
     reply.send({
         code: 0,
         msg: "Successfully create room.",
@@ -18,7 +18,7 @@ export const handleCreateRoom: RouteHandlerMethod = async (request: FastifyReque
 
 // 获取所有房间
 export const handleGetAllRoom: RouteHandlerMethod = async (request: FastifyRequest, reply: FastifyReply) => {
-    const rooms = (await request.server.roomRedis.getAllChatRoom()).map((roomRawId) => {
+    const rooms = (await request.server.roomCache.getAllChatRoom()).map((roomRawId) => {
         const id = roomRawId.split("-")[2];
         return id;
     });
@@ -32,7 +32,7 @@ export const handleGetAllRoom: RouteHandlerMethod = async (request: FastifyReque
 // 获取房间信息
 export const handleGetRoom: RouteHandlerMethod = async (request: FastifyRequest, reply: FastifyReply) => {
     const { roomId } = request.params as { roomId: string };
-    const room = await request.server.roomRedis.getChatRoomInfo(roomId);
+    const room = await request.server.roomCache.getChatRoomInfo(roomId);
     reply.send({
         code: 0,
         msg: "Successfully get room.",
@@ -44,7 +44,7 @@ export const handleGetRoom: RouteHandlerMethod = async (request: FastifyRequest,
 export const handleLeaveRoom: RouteHandlerMethod = async (request: FastifyRequest, reply: FastifyReply) => {
     const { roomId } = request.params as { roomId: string };
     const { username } = request.userInfo;
-    await request.server.roomRedis.leaveChatRoom(roomId, username);
+    await request.server.roomCache.leaveChatRoom(roomId, username);
     reply.send({
         code: 0,
         msg: "Successfully leave room.",
@@ -55,7 +55,7 @@ export const handleLeaveRoom: RouteHandlerMethod = async (request: FastifyReques
 export const handleJoinRoom: RouteHandlerMethod = async (request: FastifyRequest, reply: FastifyReply) => {
     const { roomId } = request.params as { roomId: string };
     const { username } = request.userInfo;
-    await request.server.roomRedis.joinChatRoom(roomId, username);
+    await request.server.roomCache.joinChatRoom(roomId, username);
     reply.send({
         code: 0,
         msg: "Successfully join room.",
@@ -65,7 +65,7 @@ export const handleJoinRoom: RouteHandlerMethod = async (request: FastifyRequest
 // handleGetRoomUsers
 export const handleGetRoomUsers: RouteHandlerMethod = async (request: FastifyRequest, reply: FastifyReply) => {
     const { roomId } = request.params as { roomId: string };
-    const users = (await request.server.roomRedis.getChatRoomInfo(roomId)).userList;
+    const users = (await request.server.roomCache.getChatRoomInfo(roomId)).userList;
     reply.send({
         code: 0,
         msg: "Successfully get room users.",
@@ -77,9 +77,9 @@ export const handleGetRoomUsers: RouteHandlerMethod = async (request: FastifyReq
 export const handleDeleteRoom: RouteHandlerMethod = async (request: FastifyRequest, reply: FastifyReply) => {
     const { roomId } = request.params as { roomId: string };
     const { id } = request.userInfo;
-    const owner = await request.server.roomRedis.getChatRoomOwnerId(roomId);
+    const owner = await request.server.roomCache.getChatRoomOwnerId(roomId);
     if (owner && id === Number(owner)) {
-        await request.server.roomRedis.delChatRoom(roomId);
+        await request.server.roomCache.delChatRoom(roomId);
     }
     reply.send({
         code: 0,
@@ -92,7 +92,7 @@ export const handleUpdateRoom: RouteHandlerMethod = async (request: FastifyReque
     const { roomId } = request.params as { roomId: string };
     const body = request.body as Partial<RoomInfo>;
     
-    await request.server.roomRedis.updateChatRoomInfo(roomId, body);
+    await request.server.roomCache.updateChatRoomInfo(roomId, body);
 
     reply.send({
         code: 0,

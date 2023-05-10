@@ -22,12 +22,12 @@ const app = fastify({ logger: {
     stream: stream
 }});
 
-app.decorate("userSql", Store.get("UserSql"));
-app.decorate("messageSql", Store.get("MessageSql"));
+app.decorate("userStore", Store.get("UserSql"));
+app.decorate("messageStore", Store.get("MessageSql"));
 app.decorate("sendMail", sendMail);
-app.decorate("verifyCodeRedis", Cache.get("RedisVerifyCode"));
-app.decorate("userRedis", Cache.get("RedisUser"));
-app.decorate("roomRedis", Cache.get("RedisChatRoom"));
+app.decorate("verifyCodeCache", Cache.get("RedisVerifyCode"));
+app.decorate("userCache", Cache.get("RedisUser"));
+app.decorate("roomCache", Cache.get("RedisChatRoom"));
 
 app.addSchema({
     $id: "opt/200",

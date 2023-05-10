@@ -48,7 +48,7 @@ const checkLogin = fp((fastify: FastifyInstance, opts: FastifyPluginOptions, nex
                 noLogin()
                 return;
             }
-            const userInfo = await request.server.userRedis.getUserLoginInfo(token);
+            const userInfo = await request.server.userCache.getUserLoginInfo(token);
             if (!userInfo) {
                 noLogin()
                 return;

@@ -5,12 +5,12 @@ import { RoomCache, UserCache, VerifyCodeCache } from "./module/lib/cache";
 
 declare module "fastify" {
     export interface FastifyInstance {
-        userSql: UserStore;
-        messageSql: MessageStore;
+        userStore: UserStore;
+        messageStore: MessageStore;
         sendMail: typeof sendMail;
-        verifyCodeRedis: VerifyCodeCache;
-        userRedis: UserCache;
-        roomRedis: RoomCache;
+        verifyCodeCache: VerifyCodeCache;
+        userCache: UserCache;
+        roomCache: RoomCache;
     }
 
     export interface FastifyRequest {

@@ -29,6 +29,7 @@ export class RedisVerifyCode extends Redis implements VerifyCodeCache {
     }
 
     public async checkVerifyCode(email: string, code: string) {
-        return (await this.client.get(RedisVerifyCode.key(email))) === code;
+        const scode = await this.client.get(RedisVerifyCode.key(email))
+        return scode === code;
     }
 }

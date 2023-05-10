@@ -14,8 +14,6 @@ const log = pino({
 
 envConfig();
 
-// 新建一个即时通讯应用的用户数据表
-
 // 检测数据库中是否存在某个表
 // SELECT COUNT(*) FROM information_schema.TABLES WHERE table_name = 'user';
 
