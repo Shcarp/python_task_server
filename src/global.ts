@@ -1,15 +1,20 @@
-
-import { MessageSql, UserSql } from "./module/mysql";
 import { sendMail } from "./utils/email";
-import { RedisUser, RedisVerifyCode } from "./module/redis";
+import { UserInfo } from "./type";
+import { MessageStore, UserStore } from "./module/lib/store";
+import { RoomCache, UserCache, VerifyCodeCache } from "./module/lib/cache";
 
 declare module "fastify" {
     export interface FastifyInstance {
-        userSql: UserSql;
-        messageSql: MessageSql;
+        userSql: UserStore;
+        messageSql: MessageStore;
         sendMail: typeof sendMail;
-        verifyCodeRedis: RedisVerifyCode;
-        userRedis: RedisUser;
+        verifyCodeRedis: VerifyCodeCache;
+        userRedis: UserCache;
+        roomRedis: RoomCache;
+    }
+
+    export interface FastifyRequest {
+        userInfo: UserInfo;
     }
 }
 

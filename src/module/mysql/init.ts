@@ -1,9 +1,16 @@
 import { OkPacket, Pool, ResultSetHeader, RowDataPacket, createPool } from "mysql2";
 import { config as envConfig } from "dotenv";
 import { pino } from "pino";
-import { DB } from "../lib/db";
+import { Store } from "../lib/db";
 
-const log = pino();
+import split from "split2";
+
+const stream = split(JSON.parse)
+
+const log = pino({
+    level: "error",
+    stream: stream
+});
 
 envConfig();
 
@@ -26,7 +33,7 @@ const sqlPool: Pool = createPool({
     },
 });
 
-export abstract class MySql extends DB {
+export abstract class MySql extends Store {
     public pool: Pool;
     constructor() {
         super();

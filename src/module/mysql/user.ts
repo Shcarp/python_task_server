@@ -4,12 +4,13 @@ import { MySql } from "./init";
 import { usersql } from "./init.sql";
 import { OkPacket } from "mysql2";
 import { UserInfo } from "../../type";
+import { UserStore, CreatorUser } from "../lib/store";
+import { Store } from "../lib/db";
 
 const log = pino();
 
-type CreatorUser = Omit<UserInfo, "id" | "last_active" | "created_at" | "updated_at" | "profile_picture">;
-
-export class UserSql extends MySql {
+@Store.register
+export class UserSql extends MySql implements UserStore {
     private userInfofield = `id, username, email, profile_picture, last_active, created_at, updated_at`
 
     // 判断用户名是否存在
@@ -20,6 +21,7 @@ export class UserSql extends MySql {
             if(result.length > 0) {
                 return true;
             }
+            return false;
         } catch (error) {
             log.error(`Failed to check the username exist. Error info: ${error}`);
             return false;
@@ -53,6 +55,7 @@ export class UserSql extends MySql {
             return result[0];
         } catch (error) {
             log.error(`Failed to check the user password. Error info: ${error}`);
+            return null;
         }
     }
 
@@ -85,6 +88,7 @@ export class UserSql extends MySql {
             return result[0];
         } catch (error) {
             log.error(`Failed to get the user info. Error info: ${error}`);
+            return null
         }
     }
     // checkEmailCorrect
@@ -95,7 +99,8 @@ export class UserSql extends MySql {
             const result = await this.query<UserInfo[]>(sql);
             if(result.length > 0) {
                 return true;
-            }   
+            }
+            return false;
         } catch (error) {
             log.error(`Failed to check the email correct. Error info: ${error}`);
             return false;
@@ -124,7 +129,6 @@ export class UserSql extends MySql {
         }
     }
     
-
     protected async init() {
         try {
             await this.query(usersql);

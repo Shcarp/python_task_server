@@ -1,21 +1,33 @@
 import fastify from "fastify";
-import "./global";
-import { MessageSql, UserSql } from "./module/mysql";
-// import { client } from "./module/redis";
-import { sendMail } from "./utils/email";
-import { RedisUser, RedisVerifyCode } from "./module/redis";
 import jwt from "@fastify/jwt";
+import split from "split2";
 
-const app = fastify({ logger: true });
+import "./global";
+// 需要这两个，不加，编译后的代码中，没有这两个文件，导致注册不成功
+import "./module/mysql"
+import "./module/redis"
 
-const usesql = new UserSql();
-const messageSql = new MessageSql();
+import { sendMail } from "./utils/email";
+import { Cache, Store } from "./module/lib/db";
 
-app.decorate("userSql", usesql);
-app.decorate("messageSql", messageSql);
+import checkLogin from "./middleware/checkLogin";
+import setUserInfo from "./middleware/setUserInfo";
+import userRouter from "./routes/v1/user";
+import roomRouter from "./routes/v1/room";
+
+const stream = split(JSON.parse)
+
+const app = fastify({ logger: {
+    level: "error",
+    stream: stream
+}});
+
+app.decorate("userSql", Store.get("UserSql"));
+app.decorate("messageSql", Store.get("MessageSql"));
 app.decorate("sendMail", sendMail);
-app.decorate("verifyCodeRedis", new RedisVerifyCode());
-app.decorate("userRedis", new RedisUser());
+app.decorate("verifyCodeRedis", Cache.get("RedisVerifyCode"));
+app.decorate("userRedis", Cache.get("RedisUser"));
+app.decorate("roomRedis", Cache.get("RedisChatRoom"));
 
 app.addSchema({
     $id: "opt/200",
@@ -40,20 +52,12 @@ app.addSchema({
 
 app.register(jwt, { secret: "supersecret" });
 
-app.register(require("./routes/v1/user"), { prefix: "/v1" });
+app.register(checkLogin);
+app.register(setUserInfo);
 
-app.get("/creator", async (request, reply) => {
-    console.log(await app.userSql.checkUsernameExist("test001"));
-    // return app.userSql.insertUser({
-    //   username: "test001",
-    //   password: "test001password",
-    //   email: "sunhui1314."
-    // })
-    const userInfo = await app.userSql.getUserInfo("test001");
-    // await request.redis.set("test001", "test001token");
-    console.log(userInfo);
-    reply.send(userInfo);
-});
+app.register(userRouter, { prefix: "/v1" });
+app.register(roomRouter, { prefix: "/v1" });
+
 
 const start = async () => {
     try {
@@ -64,3 +68,4 @@ const start = async () => {
     }
 };
 start();
+

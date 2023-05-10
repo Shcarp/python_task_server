@@ -2,9 +2,11 @@ import { pino } from "pino";
 
 import { MySql } from "./init";
 import { messagesql } from "./init.sql";
+import { Store } from "../lib/db";
 
 const log = pino();
 
+@Store.register
 export class MessageSql extends MySql {
     protected async init() {
         try {
