@@ -13,7 +13,6 @@ import { Cache, Store } from "./module/lib/db";
 import checkLogin from "./middleware/checkLogin";
 import setUserInfo from "./middleware/setUserInfo";
 import userRouter from "./routes/v1/user";
-import roomRouter from "./routes/v1/room";
 
 const stream = split(JSON.parse)
 
@@ -23,11 +22,12 @@ const app = fastify({ logger: {
 }});
 
 app.decorate("userStore", Store.get("UserSql"));
-app.decorate("messageStore", Store.get("MessageSql"));
-app.decorate("sendMail", sendMail);
-app.decorate("verifyCodeCache", Cache.get("RedisVerifyCode"));
+app.decorate("platformSql", Store.get("PlatformSql"));
+app.decorate("scriptSql", Store.get("ScriptSql"));
+app.decorate("userScriptSql", Store.get("UserScriptSql"));
+app.decorate("userScriptFavoriteSql", Store.get("UserScriptFavoriteSql"));
+app.decorate("scriptStatSql", Store.get("ScriptStatSql"));
 app.decorate("userCache", Cache.get("RedisUser"));
-app.decorate("roomCache", Cache.get("RedisChatRoom"));
 
 app.addSchema({
     $id: "opt/200",
@@ -56,12 +56,12 @@ app.register(checkLogin);
 app.register(setUserInfo);
 
 app.register(userRouter, { prefix: "/v1" });
-app.register(roomRouter, { prefix: "/v1" });
 
 
 const start = async () => {
     try {
-        await app.listen({ host: "0.0.0.0", port: 3000 });
+        await app.listen({ host: "0.0.0.0", port: 3306 });
+        console.log("server start");
     } catch (err) {
         app.log.error(err);
         process.exit(1);

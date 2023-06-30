@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyPluginOptions } from "fastify";
-import { handleCheckoutUsername, handleLogin, handleRegister, handleGetVerifyCode, handleCheckVerifyCode, handleLogout, handleResetPassword } from "../../handle/v1/user";
+import { handleCheckoutUsername, handleLogin, handleRegister, handleLogout, handleResetPassword } from "../../handle/v1/user";
 
 export default function (fastify: FastifyInstance, opts: FastifyPluginOptions, next: () => void) {
     // 注册用户
@@ -99,12 +99,5 @@ export default function (fastify: FastifyInstance, opts: FastifyPluginOptions, n
             },
         }
     }, handleResetPassword)
-
-    // 获取邮箱验证码
-    fastify.get("/getVerifyCode", handleGetVerifyCode);
-
-    // 验证验证码
-    fastify.post("/checkVerifyCode", handleCheckVerifyCode);
-
     next();
 }

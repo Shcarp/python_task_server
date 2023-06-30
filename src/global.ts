@@ -1,20 +1,27 @@
 import { sendMail } from "./utils/email";
 import { UserInfo } from "./type";
-import { MessageStore, UserStore } from "./module/lib/store";
-import { RoomCache, UserCache, VerifyCodeCache } from "./module/lib/cache";
+import {
+    UserStore,
+    PlatformStore,
+    UserScriptFavoriteStore,
+    UserScriptStore,
+    ScriptStatStore,
+    ScriptStore,
+} from "./module/lib/store";
+import { UserCache } from "./module/lib/cache";
 
 declare module "fastify" {
     export interface FastifyInstance {
         userStore: UserStore;
-        messageStore: MessageStore;
-        sendMail: typeof sendMail;
-        verifyCodeCache: VerifyCodeCache;
+        platformSql: PlatformStore;
+        scriptSql: ScriptStore;
+        userScriptSql: UserScriptStore;
+        userScriptFavoriteSql: UserScriptFavoriteStore;
+        scriptStatSql: ScriptStatStore;
         userCache: UserCache;
-        roomCache: RoomCache;
     }
 
     export interface FastifyRequest {
         userInfo: UserInfo;
     }
 }
-

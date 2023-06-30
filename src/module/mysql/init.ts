@@ -26,9 +26,6 @@ const mysql_config = {
 
 const sqlPool: Pool = createPool({
     ...mysql_config,
-    ssl: {
-        rejectUnauthorized: true,
-    },
 });
 
 export abstract class MySql extends Store {

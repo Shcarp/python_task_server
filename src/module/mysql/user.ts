@@ -1,7 +1,7 @@
 import { pino } from "pino";
 
 import { MySql } from "./init";
-import { usersql } from "./init.sql";
+import { userSql } from "./init.sql";
 import { OkPacket } from "mysql2";
 import { UserInfo } from "../../type";
 import { UserStore, CreatorUser } from "../lib/store";
@@ -15,7 +15,7 @@ export class UserSql extends MySql implements UserStore {
 
     // 判断用户名是否存在
     public async checkUsernameExist(username: string) {
-        const sql = `SELECT username FROM av_user WHERE username = '${username}'`;
+        const sql = `SELECT username FROM user WHERE uk_username = '${username}'`;
         try {
             const result = await this.query<UserInfo[]>(sql);
             if(result.length > 0) {
@@ -30,7 +30,7 @@ export class UserSql extends MySql implements UserStore {
 
     // 插入一个用户
     public async insertUser(user: CreatorUser) {
-        const sql = `INSERT INTO av_user (username, password, email, created_at, updated_at) 
+        const sql = `INSERT INTO user (username, password, email, created_at, updated_at) 
         VALUES ('${user.username}', '${user.password}', '${user.email}', NOW(), NOW());
         `;
         try {
@@ -43,7 +43,7 @@ export class UserSql extends MySql implements UserStore {
 
     // 判断用户登录密码是否正确
     public async checkUserPassword(username: string, password: string) {
-        const sql = `SELECT * FROM av_user WHERE username = '${username}' AND password = '${password}'`;
+        const sql = `SELECT * FROM user WHERE username = '${username}' AND password = '${password}'`;
         try {
             const result = await this.query<UserInfo[]>(sql);
             if (result.length !== 1) {
@@ -61,7 +61,7 @@ export class UserSql extends MySql implements UserStore {
 
     // 更新用户最后登录时间
     public async updateUserLastActive(id: number) {
-        const sql = `UPDATE av_user SET last_active = NOW() WHERE id = '${id}'`;
+        const sql = `UPDATE user SET last_active = NOW() WHERE id = '${id}'`;
         try {
             await this.query(sql);
         } catch (error) {
@@ -71,7 +71,7 @@ export class UserSql extends MySql implements UserStore {
 
     // 更新用户信息
     public async updateUserInfo(id: number, user: CreatorUser) {
-        const sql = `UPDATE av_user SET username = '${user.username}', password = '${user.password}', email = '${user.email}', updated_at = NOW() WHERE id = '${id}'`;
+        const sql = `UPDATE user SET username = '${user.username}', password = '${user.password}', email = '${user.email}', updated_at = NOW() WHERE id = '${id}'`;
         try {
             await this.query(sql);
             log.info(`Successfully update the user info: ${user.username}`)
@@ -82,7 +82,7 @@ export class UserSql extends MySql implements UserStore {
 
     // 获取用户信息
     public async getUserInfo(username: string) {
-        const sql = `SELECT ${this.userInfofield} FROM av_user WHERE username = '${username}'`;
+        const sql = `SELECT ${this.userInfofield} FROM user WHERE username = '${username}'`;
         try {
             const result = await this.query<UserInfo[]>(sql);
             return result[0];
@@ -94,7 +94,7 @@ export class UserSql extends MySql implements UserStore {
     // checkEmailCorrect
     public async checkEmailCorrect(username: string, email: string) {
 
-        const sql = `SELECT ${this.userInfofield} FROM av_user WHERE username = '${username}' AND email = '${email}' `;
+        const sql = `SELECT ${this.userInfofield} FROM user WHERE username = '${username}' AND email = '${email}' `;
         try {
             const result = await this.query<UserInfo[]>(sql);
             if(result.length > 0) {
@@ -109,7 +109,7 @@ export class UserSql extends MySql implements UserStore {
 
     // 更新用户密码
     public async updateUserPassword(email: string, password: string) {
-        const sql = `UPDATE av_user SET password = '${password}', updated_at = NOW() WHERE username = '${email}'`;
+        const sql = `UPDATE user SET password = '${password}', updated_at = NOW() WHERE username = '${email}'`;
         try {
             await this.query(sql);
             log.info(`Successfully update the user password: ${email}`)
@@ -120,7 +120,7 @@ export class UserSql extends MySql implements UserStore {
 
     // 更新用户头像
     public async updateUserProfilePicture(id: number, profile_picture: string) {
-        const sql = `UPDATE av_user SET profile_picture = '${profile_picture}', updated_at = NOW() WHERE id = '${id}'`;
+        const sql = `UPDATE user SET profile_picture = '${profile_picture}', updated_at = NOW() WHERE id = '${id}'`;
         try {
             await this.query(sql);
             log.info(`Successfully update the user profile picture: ${id}`)
@@ -131,9 +131,9 @@ export class UserSql extends MySql implements UserStore {
     
     protected async init() {
         try {
-            await this.query(usersql);
+            await this.query(userSql);
         } catch (error) {
-            log.error(`Failed to create the av_user table. Error info: ${error}`);
+            log.error(`Failed to create the user table. Error info: ${error}`);
         }
     }
 }

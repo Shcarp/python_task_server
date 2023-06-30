@@ -1,9 +1,5 @@
 import { UserInfo } from "../../type";
 
-export interface MessageStore {
-    
-}
-
 export type CreatorUser = Omit<UserInfo, "id" | "last_active" | "created_at" | "updated_at" | "profile_picture">;
 export interface UserStore {
     checkUsernameExist(username: string): Promise<boolean>;
@@ -16,3 +12,15 @@ export interface UserStore {
     updateUserPassword(email: string, password: string): Promise<void>;
     updateUserProfilePicture(id: number, profile_picture: string): Promise<void>;
 }
+
+export interface ScriptStore {
+
+}
+
+export interface PlatformStore {}
+
+export interface ScriptStatStore {}
+
+export interface UserScriptFavoriteStore {}
+
+export interface UserScriptStore {}

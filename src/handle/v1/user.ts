@@ -15,19 +15,8 @@ type RegisterRequestBody = BaseRequestBody & {
     code: string;
 };
 
-// username === email
-
 export const handleRegister: RouteHandlerMethod = async (request: FastifyRequest, reply: FastifyReply) => {
-    const { username, password, email, code } = request.body as RegisterRequestBody;
-    // 判断验证码是否正确
-    const verifyCode = await request.server.verifyCodeCache.checkVerifyCode(email, code);
-    if (!verifyCode) {
-        reply.send({
-            code: 1,
-            msg: "The verify code is not correct.",
-        });
-        return;
-    }
+    const { username, password, email } = request.body as RegisterRequestBody;
     // 判断用户名是否存在
     const isExist = await request.server.userStore.checkUsernameExist(username);
     if (isExist) {
@@ -96,57 +85,6 @@ export const handleCheckoutUsername = async (request: FastifyRequest, reply: Fas
         code: 0,
         msg: "Successfully check the username.",
         data: !!isExist,
-    });
-};
-
-export const handleGetVerifyCode = async (request: FastifyRequest, reply: FastifyReply) => {
-    const generateVerifyCode = async () => {
-        // 生成6位数随机数
-        const verifyCode = Math.floor(Math.random() * 1000000)
-            .toString()
-            .padStart(6, "0");
-        await request.server.verifyCodeCache.setVerifyCode(email, verifyCode);
-        return verifyCode;
-    };
-    let retry = 1;
-    const send = async () => {
-        try {
-            await reply.server.sendMail(email, "VerifyCode", "VerifyCode", await generateVerifyCode());
-        } catch (error) {
-            if (retry < 3) {
-                retry++;
-                send();
-            } else {
-                log.error(error);
-            }
-        }
-    };
-
-    const { email } = request.query as { email: string };
-    send();
-
-    reply.send({
-        code: 0,
-        msg: "Successfully get the verify code.",
-    });
-};
-
-// 验证邮箱验证码
-export const handleCheckVerifyCode = async (request: FastifyRequest, reply: FastifyReply) => {
-    const { email, verifyCode } = request.body as { email: string; verifyCode: string };
-    const code = await request.server.verifyCodeCache.checkVerifyCode(email, verifyCode);
-    if (!code) {
-        reply.send({
-            code: 1,
-            msg: "The verify code is not correct.",
-        });
-        return;
-    }
-    // 从redis中删除验证码
-    request.server.verifyCodeCache.delVerifyCode(email);
-    reply.send({
-        code: 0,
-        msg: "Successfully check the verify code.",
     });
 };
 
