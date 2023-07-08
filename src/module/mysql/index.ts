@@ -5,3 +5,4 @@ export * from "./script";
 export * from "./userScripts";
 export * from "./userFavorites";
 export * from "./scriptStats";
+export * from "./userLikes";

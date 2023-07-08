@@ -7,12 +7,13 @@ import "./global";
 import "./module/mysql"
 import "./module/redis"
 
-import { sendMail } from "./utils/email";
 import { Cache, Store } from "./module/lib/db";
 
 import checkLogin from "./middleware/checkLogin";
 import setUserInfo from "./middleware/setUserInfo";
+import commonRouter from "./routes/v1/common";
 import userRouter from "./routes/v1/user";
+import scriptRouter from "./routes/v1/script";
 
 const stream = split(JSON.parse)
 
@@ -27,6 +28,7 @@ app.decorate("scriptSql", Store.get("ScriptSql"));
 app.decorate("userScriptSql", Store.get("UserScriptSql"));
 app.decorate("userScriptFavoriteSql", Store.get("UserScriptFavoriteSql"));
 app.decorate("scriptStatSql", Store.get("ScriptStatSql"));
+app.decorate("scriptLikeSql", Store.get("UserScriptLikeSql"));
 app.decorate("userCache", Cache.get("RedisUser"));
 
 app.addSchema({
@@ -51,17 +53,19 @@ app.addSchema({
 });
 
 app.register(jwt, { secret: "supersecret" });
-
+ 
 app.register(checkLogin);
 app.register(setUserInfo);
 
+app.register(commonRouter, { prefix: "/v1" })
 app.register(userRouter, { prefix: "/v1" });
+app.register(scriptRouter, { prefix: "/v1" });
 
 
 const start = async () => {
     try {
         await app.listen({ host: "0.0.0.0", port: 3306 });
-        console.log("server start");
+        console.log("server start: http://localhost:3306");
     } catch (err) {
         app.log.error(err);
         process.exit(1);

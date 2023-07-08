@@ -24,9 +24,22 @@ const mysql_config = {
     database: process.env.MYSQL_DATABASE,
 };
 
-const sqlPool: Pool = createPool({
-    ...mysql_config,
-});
+const createSqlPool = (config: any): Pool => {
+    return createPool({
+        ...config,
+        enableKeepAlive: true,
+        keepAliveInitialDelay: 30000,
+    });
+}
+
+
+let sqlPool: Pool = createSqlPool(mysql_config);
+
+sqlPool.on("error", (err) => {
+        log.error(`MySQL error: ${err}`);
+        sqlPool = createSqlPool(mysql_config);
+    }
+);
 
 export abstract class MySql extends Store {
     public pool: Pool;
@@ -48,6 +61,22 @@ export abstract class MySql extends Store {
             });
         });
     }
+
+   // 结构化数据
+    protected async queryStruct<T extends RowDataPacket[][] | RowDataPacket[] | OkPacket | OkPacket[] | ResultSetHeader>(
+        sql: string,
+        values: any
+    ): Promise<T> {
+        return new Promise((resolve, reject) => {
+            this.pool.query<T>(sql, values, (err, result) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve(result);
+            });
+        });
+    }
+            
 
     protected abstract init(): void;
 }

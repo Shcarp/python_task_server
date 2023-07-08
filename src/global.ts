@@ -5,6 +5,7 @@ import {
     PlatformStore,
     UserScriptFavoriteStore,
     UserScriptStore,
+    UserScriptLikeStore,
     ScriptStatStore,
     ScriptStore,
 } from "./module/lib/store";
@@ -19,6 +20,7 @@ declare module "fastify" {
         userScriptFavoriteSql: UserScriptFavoriteStore;
         scriptStatSql: ScriptStatStore;
         userCache: UserCache;
+        scriptLikeSql: UserScriptLikeStore;
     }
 
     export interface FastifyRequest {

@@ -15,9 +15,9 @@ export class UserSql extends MySql implements UserStore {
 
     // 判断用户名是否存在
     public async checkUsernameExist(username: string) {
-        const sql = `SELECT username FROM user WHERE uk_username = '${username}'`;
+        const sql = `SELECT username FROM user WHERE uk_username = ?`;
         try {
-            const result = await this.query<UserInfo[]>(sql);
+            const result = await this.queryStruct<UserInfo[]>(sql, [username]);
             if(result.length > 0) {
                 return true;
             }
@@ -43,9 +43,9 @@ export class UserSql extends MySql implements UserStore {
 
     // 判断用户登录密码是否正确
     public async checkUserPassword(username: string, password: string) {
-        const sql = `SELECT * FROM user WHERE username = '${username}' AND password = '${password}'`;
+        const sql = `SELECT * FROM user WHERE username = ? AND password = ?`;
         try {
-            const result = await this.query<UserInfo[]>(sql);
+            const result = await this.queryStruct<UserInfo[]>(sql, [username, password]);
             if (result.length !== 1) {
                 return null;
             }
@@ -109,9 +109,9 @@ export class UserSql extends MySql implements UserStore {
 
     // 更新用户密码
     public async updateUserPassword(email: string, password: string) {
-        const sql = `UPDATE user SET password = '${password}', updated_at = NOW() WHERE username = '${email}'`;
+        const sql = `UPDATE user SET password = ?, updated_at = NOW() WHERE username = ?`;
         try {
-            await this.query(sql);
+            await this.queryStruct(sql, [email, password]);
             log.info(`Successfully update the user password: ${email}`)
         } catch (error) {
             log.error(`Failed to update the user password. Error info: ${error}`);
