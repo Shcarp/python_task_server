@@ -9,8 +9,8 @@ const log = pino();
 
 export interface ScriptStatInfo {
     scriptUid: string;
-    likes?: number;
-    favorites?: number;
+    like?: number;
+    favorite?: number;
 }
 
 @Store.register
@@ -38,18 +38,22 @@ export class ScriptStatSql extends MySql implements ScriptStatStore {
     }
 
     async update(params: ScriptStatInfo) {
+        const queryParam = [];
         let sql = `UPDATE script_stats SET `;
-        if (params.likes) {
-            sql += `likes = ${params.likes}, `;
+        if (params.like) {
+            sql += `likes = likes + ? `;
+            queryParam.push(params.like);
         }
-        if (params.favorites) {
-            sql += `favorites = ${params.favorites}, `;
+        if (params.favorite) {
+            sql += `favorites = favorites + ? `;
+            queryParam.push(params.favorite);
         }
 
-        sql += `WHERE scriptUid = '${params.scriptUid}'`;
+        sql += `WHERE scriptUid = ?`;
+        queryParam.push(params.scriptUid);
 
         try {
-            await this.query(sql);
+            await this.queryStruct(sql, queryParam);
             log.info(`Successfully update a script_stat`);
         } catch (error) {
             log.error(`Failed to update a script_stat. Error info: ${error}`);

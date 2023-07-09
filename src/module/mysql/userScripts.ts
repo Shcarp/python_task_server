@@ -22,12 +22,12 @@ export class UserScriptSql extends MySql implements UserScriptStore {
         }
     }
 
-    async createUserScript(userId: number, scriptId: string): Promise<void> {
-        const sql = `INSERT INTO user_scripts (userId, scriptId, created_at) values (${userId}, ${scriptId}, NOW());`
+    async createUserScript(userId: number, scriptUid: string): Promise<void> {
+        const sql = `INSERT INTO user_scripts (userId, scriptUid, created_at) values (${userId}, ${scriptUid}, NOW());`
 
         try {
             await this.query(sql);
-            log.info(`Successfully insert a user_script: ${userId} ${scriptId}`)
+            log.info(`Successfully insert a user_script: ${userId} ${scriptUid}`)
         }
         catch (error) {
             log.error(`Failed to insert a user_script. Error info: ${error}`);

@@ -3,6 +3,7 @@ import { pino } from "pino";
 import { Store } from "../lib/db";
 import { UserScriptLikeStore } from "../lib/store";
 import { MySql } from "./init";
+import { ResultSetHeader } from "mysql2";
 
 const log = pino();
 
@@ -16,9 +17,9 @@ export class UserScriptLikeSql extends MySql implements UserScriptLikeStore {
         }
     }
     
-    async like(userId: number, scriptUid: string): Promise<void> {
+    async like(userId: number, scriptUid: string): Promise<number> {
         try {
-            await this.queryStruct(`
+            const res: ResultSetHeader = await this.queryStruct(`
                 INSERT INTO user_likes (userId, scriptUid) 
                 SELECT ?, ? 
                 FROM DUAL 
@@ -28,15 +29,17 @@ export class UserScriptLikeSql extends MySql implements UserScriptLikeStore {
                     FROM user_likes 
                     WHERE userId = ? AND scriptUid = ?
                 )`, [userId, scriptUid, userId, scriptUid]);
+            return res.affectedRows
         } catch (error) {
             log.error(`Failed to like a script. Error info: ${error}`);
             throw new Error(`Failed to like a script. Error info: ${error}`);
         }
     }
 
-    async unlike(userId: number, scriptUid: string): Promise<void> {
+    async unlike(userId: number, scriptUid: string): Promise<number> {
         try {
-            await this.queryStruct(`DELETE FROM user_likes WHERE userId=? AND scriptUid=?`, [userId, scriptUid]);
+            const res: ResultSetHeader = await this.queryStruct(`DELETE FROM user_likes WHERE userId=? AND scriptUid=?`, [userId, scriptUid]);
+            return res.affectedRows
         } catch (error) {
             log.error(`Failed to unlike a script. Error info: ${error}`);
             throw new Error(`Failed to unlike a script. Error info: ${error}`);

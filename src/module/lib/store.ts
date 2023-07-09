@@ -1,5 +1,5 @@
 import { UserInfo } from "../../type";
-import { GetScriptListInfoParams, PlatformInfo, ScriptInfo } from "../mysql";
+import { GetScriptListInfoParams, PlatformInfo, ScriptInfo, ScriptStatInfo } from "../mysql";
 
 export type CreatorUser = Omit<UserInfo, "id" | "last_active" | "created_at" | "updated_at" | "profile_picture">;
 export interface UserStore {
@@ -17,6 +17,10 @@ export interface UserStore {
 export interface ScriptStore {
     createScript(content: ScriptInfo): Promise<void>;
     getScriptList(param: GetScriptListInfoParams & { userId: number }): Promise<ScriptInfo[]>;
+    getScriptInfoByUid(userID: number, scriptUid: string): Promise<ScriptInfo | null>;
+    getScriptListByUserId(param: GetScriptListInfoParams & { userId: number }): Promise<ScriptInfo[] | null>
+    getUserLikeScriptList(param: GetScriptListInfoParams & { userId: number }): Promise<ScriptInfo[] | null>
+    getUserFavoriteScriptList(param: GetScriptListInfoParams & { userId: number }): Promise<ScriptInfo[] | null>
 }
 
 export interface PlatformStore {
@@ -25,16 +29,17 @@ export interface PlatformStore {
 
 export interface ScriptStatStore {
     insert(uid: string): Promise<void>;
+    update(params: ScriptStatInfo): Promise<void>;
 }
 
 export interface UserScriptFavoriteStore {
-    favorite(userId: number, scriptId: string): Promise<void>;
-    unfavorite(userId: number, scriptId: string): Promise<void>;
+    favorite(userId: number, scriptId: string): Promise<number>;
+    unfavorite(userId: number, scriptId: string): Promise<number>;
 }
 
 export interface UserScriptLikeStore {
-    like(userId: number, scriptId: string): Promise<void>;
-    unlike(userId: number, scriptId: string): Promise<void>;
+    like(userId: number, scriptId: string): Promise<number>;
+    unlike(userId: number, scriptId: string): Promise<number>;
 }
 
 export interface UserScriptStore {
