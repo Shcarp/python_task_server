@@ -237,7 +237,7 @@ export default function (fastify: FastifyInstance, opts: FastifyPluginOptions, n
                     properties: {
                         scriptUid: { type: "string" },
                     },
-                }
+                },
             },
         },
         handleGetDetail
@@ -291,7 +291,7 @@ export default function (fastify: FastifyInstance, opts: FastifyPluginOptions, n
             },
         },
         handleGetUserUploadList
-    )
+    );
     fastify.get(
         "/script/list/user/like",
         {
@@ -340,7 +340,7 @@ export default function (fastify: FastifyInstance, opts: FastifyPluginOptions, n
             },
         },
         handleGetUserLikeList
-    )
+    );
     fastify.get(
         "/script/list/user/favorite",
         {
@@ -389,7 +389,7 @@ export default function (fastify: FastifyInstance, opts: FastifyPluginOptions, n
             },
         },
         handleGetUserFavoriteList
-    )
+    );
 
     next();
 }

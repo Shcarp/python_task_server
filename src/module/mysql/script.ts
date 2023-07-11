@@ -92,31 +92,27 @@ export class ScriptSql extends MySql implements ScriptStore {
 
         let insert: any = [param.userId, param.userId];
 
-        let sql = `SELECT 
-            s.*,
-            ss.likes as likes, 
-            ss.favorites AS favorites, 
-            CASE 
-                WHEN uf.scriptUid IS NOT NULL THEN 
-                1 ELSE 0 
-            END AS isFavorite,
-            CASE 
-                WHEN ul.scriptUid IS NOT NULL THEN 
-                1 ELSE 0 
-            END AS isLike
-        FROM 
-            scripts s 
-            LEFT JOIN (SELECT scriptUid, MAX(created_at) AS max_created_at FROM scripts GROUP BY scriptUid) sub ON s.scriptUid = sub.scriptUid 
-            AND s.created_at = sub.max_created_at          
-            LEFT JOIN user_favorites uf ON s.scriptUid = uf.scriptUid 
-            AND uf.userId = ?
-            LEFT JOIN user_likes ul ON s.scriptUid = ul.scriptUid 
-            AND ul.userId = ?
-            LEFT JOIN script_stats ss ON s.scriptUid = ss.scriptUid 
-        WHERE 
-            s.delete_flag = 0 
-            AND s.scriptVisibility = 1 
-            AND sub.max_created_at IS NOT NULL
+        let sql = `
+        SELECT s.*, ss.likes AS likes, ss.favorites AS favorites, 
+        CASE 
+            WHEN uf.scriptUid IS NOT NULL THEN 1 
+            ELSE 0 
+        END AS isFavorite, 
+        CASE 
+            WHEN ul.scriptUid IS NOT NULL THEN 1 
+            ELSE 0 
+        END AS isLike 
+        FROM scripts s 
+        LEFT JOIN (
+            SELECT scriptUid, MAX(created_at) AS max_created_at 
+            FROM scripts 
+            WHERE delete_flag = 0 AND scriptVisibility = 1 
+            GROUP BY scriptUid
+        ) sub ON s.scriptUid = sub.scriptUid AND s.created_at = sub.max_created_at 
+        LEFT JOIN user_favorites uf ON s.scriptUid = uf.scriptUid AND uf.userId = ?
+        LEFT JOIN user_likes ul ON s.scriptUid = ul.scriptUid AND ul.userId = ? 
+        LEFT JOIN script_stats ss ON s.scriptUid = ss.scriptUid 
+        WHERE sub.max_created_at IS NOT NULL 
         `;
 
         if (param.keyword) {
@@ -254,9 +250,7 @@ export class ScriptSql extends MySql implements ScriptStore {
             LEFT JOIN script_stats ss ON s.scriptUid = ss.scriptUid 
         WHERE
             userId = ?
-            AND sub.max_created_at IS NOT NULL`
-        ;
-
+            AND sub.max_created_at IS NOT NULL`;
         insert.push(param.pageSize);
         insert.push(offset);
         insert.push(param.userId);
@@ -308,9 +302,7 @@ export class ScriptSql extends MySql implements ScriptStore {
             LEFT JOIN script_stats ss ON s.scriptUid = ss.scriptUid 
         WHERE
             userId = ?
-            AND sub.max_created_at IS NOT NULL`
-        ;
-
+            AND sub.max_created_at IS NOT NULL`;
         insert.push(param.pageSize);
         insert.push(offset);
         insert.push(param.userId);
@@ -362,9 +354,7 @@ export class ScriptSql extends MySql implements ScriptStore {
             LEFT JOIN script_stats ss ON s.scriptUid = ss.scriptUid 
         WHERE
             userId = ?
-            AND sub.max_created_at IS NOT NULL`
-        ;
-
+            AND sub.max_created_at IS NOT NULL`;
         insert.push(param.pageSize);
         insert.push(offset);
         insert.push(param.userId);

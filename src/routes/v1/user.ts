@@ -1,5 +1,11 @@
 import { FastifyInstance, FastifyPluginOptions } from "fastify";
-import { handleCheckoutUsername, handleLogin, handleRegister, handleLogout, handleResetPassword } from "../../handle/v1/user";
+import {
+    handleCheckoutUsername,
+    handleLogin,
+    handleRegister,
+    handleLogout,
+    handleResetPassword,
+} from "../../handle/v1/user";
 
 export default function (fastify: FastifyInstance, opts: FastifyPluginOptions, next: () => void) {
     // 注册用户
@@ -44,7 +50,7 @@ export default function (fastify: FastifyInstance, opts: FastifyPluginOptions, n
                         properties: {
                             code: { type: "number" },
                             msg: { type: "string" },
-                            data: { type: "string"}
+                            data: { type: "string" },
                         },
                     },
                 },
@@ -83,21 +89,25 @@ export default function (fastify: FastifyInstance, opts: FastifyPluginOptions, n
     );
 
     // 重置密码
-    fastify.post("/resetPassword", {
-        schema: {
-            body: {
-                type: "object",
-                properties: {
-                    password: { type: "string" },
-                    email: { type: "string" },
+    fastify.post(
+        "/resetPassword",
+        {
+            schema: {
+                body: {
+                    type: "object",
+                    properties: {
+                        password: { type: "string" },
+                        email: { type: "string" },
+                    },
+                },
+                response: {
+                    200: {
+                        $ref: "opt/200",
+                    },
                 },
             },
-            response: {
-                200: {
-                    $ref: "opt/200",
-                },
-            },
-        }
-    }, handleResetPassword)
+        },
+        handleResetPassword
+    );
     next();
 }
