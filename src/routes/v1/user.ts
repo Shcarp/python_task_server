@@ -18,9 +18,8 @@ export default function (fastify: FastifyInstance, opts: FastifyPluginOptions, n
                     properties: {
                         username: { type: "string" },
                         password: { type: "string" },
-                        email: { type: "string" },
                     },
-                    required: ["username", "password", "email"],
+                    required: ["username", "password"],
                 },
                 response: {
                     200: {
@@ -43,16 +42,6 @@ export default function (fastify: FastifyInstance, opts: FastifyPluginOptions, n
                         password: { type: "string" },
                     },
                     required: ["username", "password"],
-                },
-                response: {
-                    200: {
-                        type: "object",
-                        properties: {
-                            code: { type: "number" },
-                            msg: { type: "string" },
-                            data: { type: "string" },
-                        },
-                    },
                 },
             },
         },

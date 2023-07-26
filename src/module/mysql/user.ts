@@ -15,12 +15,13 @@ export class UserSql extends MySql implements UserStore {
 
     // 判断用户名是否存在
     public async checkUsernameExist(username: string) {
-        const sql = `SELECT username FROM user WHERE uk_username = ?`;
+        const sql = `SELECT username FROM user WHERE username = ?`;
         try {
             const result = await this.queryStruct<UserInfo[]>(sql, [username]);
             if(result.length > 0) {
                 return true;
             }
+            log.info(`The username ${username} does not exist.`);
             return false;
         } catch (error) {
             log.error(`Failed to check the username exist. Error info: ${error}`);
@@ -30,8 +31,8 @@ export class UserSql extends MySql implements UserStore {
 
     // 插入一个用户
     public async insertUser(user: CreatorUser) {
-        const sql = `INSERT INTO user (username, password, email, created_at, updated_at) 
-        VALUES ('${user.username}', '${user.password}', '${user.email}', NOW(), NOW());
+        const sql = `INSERT INTO user (username, password, created_at, updated_at) 
+        VALUES ('${user.username}', '${user.password}', NOW(), NOW());
         `;
         try {
             await this.query<OkPacket>(sql);

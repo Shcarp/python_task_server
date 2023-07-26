@@ -16,7 +16,7 @@ type RegisterRequestBody = BaseRequestBody & {
 };
 
 export const handleRegister: RouteHandlerMethod = async (request: FastifyRequest, reply: FastifyReply) => {
-    const { username, password, email } = request.body as RegisterRequestBody;
+    const { username, password } = request.body as RegisterRequestBody;
     // 判断用户名是否存在
     const isExist = await request.server.userStore.checkUsernameExist(username);
     if (isExist) {
@@ -27,7 +27,7 @@ export const handleRegister: RouteHandlerMethod = async (request: FastifyRequest
         return;
     }
     // 插入一个用户
-    await request.server.userStore.insertUser({ username, password, email });
+    await request.server.userStore.insertUser({ username, password});
     reply.send({
         code: 0,
         msg: "Successfully register.",
@@ -57,7 +57,10 @@ export const handleLogin = async (request: FastifyRequest, reply: FastifyReply) 
     reply.send({
         code: 0,
         msg: "Successfully login.",
-        data: token,
+        data: {
+            token,
+            ...userInfo
+        },
     });
 };
 

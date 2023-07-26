@@ -88,30 +88,32 @@ export class ScriptSql extends MySql implements ScriptStore {
 
     async getScriptList(param: GetScriptListInfoParams & { userId: number }) {
         const keyword = param.keyword || "";
-        const offset = (param.current - 1) * param.pageSize;
+        // const offset = (param.current - 1) * param.pageSize;
 
         let insert: any = [param.userId, param.userId];
 
         let sql = `
-        SELECT s.*, ss.likes AS likes, ss.favorites AS favorites, 
-        CASE 
-            WHEN uf.scriptUid IS NOT NULL THEN 1 
-            ELSE 0 
-        END AS isFavorite, 
-        CASE 
-            WHEN ul.scriptUid IS NOT NULL THEN 1 
-            ELSE 0 
-        END AS isLike 
-        FROM scripts s 
-        LEFT JOIN (
-            SELECT scriptUid, MAX(created_at) AS max_created_at 
-            FROM scripts 
-            WHERE delete_flag = 0 AND scriptVisibility = 1 
-            GROUP BY scriptUid
-        ) sub ON s.scriptUid = sub.scriptUid AND s.created_at = sub.max_created_at 
-        LEFT JOIN user_favorites uf ON s.scriptUid = uf.scriptUid AND uf.userId = ?
-        LEFT JOIN user_likes ul ON s.scriptUid = ul.scriptUid AND ul.userId = ? 
-        LEFT JOIN script_stats ss ON s.scriptUid = ss.scriptUid 
+        SELECT s.*, ss.likes AS likes, ss.favorites AS favorites, u.avatar,
+CASE 
+    WHEN uf.scriptUid IS NOT NULL THEN 1 
+    ELSE 0 
+END AS isFavorite, 
+CASE 
+    WHEN ul.scriptUid IS NOT NULL THEN 1 
+    ELSE 0 
+END AS isLike
+FROM scripts s 
+LEFT JOIN (
+    SELECT scriptUid, MAX(created_at) AS max_created_at
+    FROM scripts 
+    WHERE delete_flag = 0 AND scriptVisibility = 1
+    GROUP BY scriptUid
+) sub ON s.scriptUid = sub.scriptUid AND s.created_at = sub.max_created_at 
+LEFT JOIN user_favorites uf ON s.scriptUid = uf.scriptUid AND uf.userId = ?
+LEFT JOIN user_likes ul ON s.scriptUid = ul.scriptUid AND ul.userId = ?
+LEFT JOIN script_stats ss ON s.scriptUid = ss.scriptUid 
+LEFT JOIN user_scripts us on us.scriptUid = s.scriptUid
+LEFT JOIN user u on u.id = us.userId
         WHERE sub.max_created_at IS NOT NULL 
         `;
 
@@ -134,10 +136,10 @@ export class ScriptSql extends MySql implements ScriptStore {
         }
 
         sql += ` ORDER BY ${LIKE_WEIGHT} * ss.likes + ${FAV_WEIGHT} * ss.favorites DESC`;
-        sql += ` LIMIT ? OFFSET ?`;
+        // sql += ` LIMIT ? OFFSET ?`;
 
-        insert.push(param.pageSize);
-        insert.push(offset);
+        // insert.push(param.pageSize);
+        // insert.push(offset);
 
         try {
             const result = await this.queryStruct(sql, insert);
@@ -197,8 +199,6 @@ export class ScriptSql extends MySql implements ScriptStore {
             s.created_at DESC
             LIMIT 1`;
 
-        console.log([scriptUid, scriptUid, userID, userID]);
-
         try {
             const result = await this.queryStruct(sql, [scriptUid, scriptUid, userID, userID]);
             return result[0] as ScriptInfo;
@@ -245,14 +245,14 @@ export class ScriptSql extends MySql implements ScriptStore {
         FROM
             user_scripts us
             LEFT JOIN scripts s ON s.scriptUid = us.scriptUid
-            LEFT JOIN ( SELECT scriptUid, MAX( created_at ) AS max_created_at FROM scripts WHERE delete_flag = 0 ${addSql} GROUP BY scriptUid LIMIT ? OFFSET ? ) sub ON s.scriptUid = sub.scriptUid 
+            LEFT JOIN ( SELECT scriptUid, MAX( created_at ) AS max_created_at FROM scripts WHERE delete_flag = 0 ${addSql} GROUP BY scriptUid) sub ON s.scriptUid = sub.scriptUid 
             AND s.created_at = sub.max_created_at
             LEFT JOIN script_stats ss ON s.scriptUid = ss.scriptUid 
         WHERE
             userId = ?
             AND sub.max_created_at IS NOT NULL`;
-        insert.push(param.pageSize);
-        insert.push(offset);
+        // insert.push(param.pageSize);
+        // insert.push(offset);
         insert.push(param.userId);
 
         try {
@@ -297,14 +297,14 @@ export class ScriptSql extends MySql implements ScriptStore {
         FROM
             user_likes ul
             LEFT JOIN scripts s ON s.scriptUid = ul.scriptUid
-            LEFT JOIN ( SELECT scriptUid, MAX( created_at ) AS max_created_at FROM scripts WHERE delete_flag = 0 ${addSql} GROUP BY scriptUid LIMIT ? OFFSET ? ) sub ON s.scriptUid = sub.scriptUid 
+            LEFT JOIN ( SELECT scriptUid, MAX( created_at ) AS max_created_at FROM scripts WHERE delete_flag = 0 ${addSql} GROUP BY scriptUid) sub ON s.scriptUid = sub.scriptUid 
             AND s.created_at = sub.max_created_at
             LEFT JOIN script_stats ss ON s.scriptUid = ss.scriptUid 
         WHERE
             userId = ?
             AND sub.max_created_at IS NOT NULL`;
-        insert.push(param.pageSize);
-        insert.push(offset);
+        // insert.push(param.pageSize);
+        // insert.push(offset);
         insert.push(param.userId);
 
         try {
@@ -317,7 +317,7 @@ export class ScriptSql extends MySql implements ScriptStore {
     }
     async getUserFavoriteScriptList(param: GetScriptListInfoParams & { userId: number }) {
         const keyword = param.keyword || "";
-        const offset = (param.current - 1) * param.pageSize;
+        // const offset = (param.current - 1) * param.pageSize;
 
         let insert: any = [];
 
@@ -349,14 +349,14 @@ export class ScriptSql extends MySql implements ScriptStore {
         FROM
             user_favorites uf
             LEFT JOIN scripts s ON s.scriptUid = uf.scriptUid
-            LEFT JOIN ( SELECT scriptUid, MAX( created_at ) AS max_created_at FROM scripts WHERE delete_flag = 0 ${addSql} GROUP BY scriptUid LIMIT ? OFFSET ? ) sub ON s.scriptUid = sub.scriptUid 
+            LEFT JOIN ( SELECT scriptUid, MAX( created_at ) AS max_created_at FROM scripts WHERE delete_flag = 0 ${addSql} GROUP BY scriptUid) sub ON s.scriptUid = sub.scriptUid 
             AND s.created_at = sub.max_created_at
             LEFT JOIN script_stats ss ON s.scriptUid = ss.scriptUid 
         WHERE
             userId = ?
             AND sub.max_created_at IS NOT NULL`;
-        insert.push(param.pageSize);
-        insert.push(offset);
+        // insert.push(param.pageSize);
+        // insert.push(offset);
         insert.push(param.userId);
 
         try {
